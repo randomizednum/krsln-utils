@@ -1,0 +1,33 @@
+#!/bin/sh
+# A simple backup utility based on luasub and ssh.
+# This is probably useless to anyone in the world other than me lol
+
+if [ ! $1 ] || [ ! $2 ]; then
+	echo 'Usage: backup-util device_ip_and_port number_of_files_to_backup directory_to_backup_from directory_to_backup_to'
+	echo 'directory_to_backup_from defaults to "/storage/emulated/0/DCIM/Camera" and directory_to_backup_to defaults to the working directory.'
+	exit
+fi
+
+# Current problems: File paths on the device from which the backups are taken must not contain spaces
+
+fromdefault="/storage/emulated/0/DCIM/Camera"
+
+# SSH to host and get files
+files=$(ssh "ssh://$1" "ls -S ${3:-$fromdefault} | head -n $2")
+filepaths=$(luasub -s " " -n 1 $files ".+" "scp://$1/${3:-$fromdefault}/%0")
+scp $filepaths ${4:-.}
+
+tmpfile=$(mktemp)
+localpaths=$(luasub -s " " -n 1 $files ".+" "${4:-.}/%0")
+backuppaths=$(luasub -s " " -n 1 $files ".+" "${3:-$fromdefault}/%0")
+(md5sum $localpaths | sort | cut -f 1 -d " ") > $tmpfile
+if ssh "ssh://$1" "md5sum $backuppaths" | sort | cut -f 1 -d " " | diff - $tmpfile > /dev/null; then
+	echo "Backup completed successfully."
+else
+	echo "Checksums do not match!"
+fi
+
+
+# for i in $@; do
+# 	echo $i
+# done
