@@ -78,7 +78,6 @@ end
 for _, v in pairs(list) do
 	if not present_news[v] then
 		local success, ret = pcall(function()
-			print(config.action, config.action:gsub("<<SUMMARY>>", "a"))
 			os.execute(
 				config.action
 					:gsub("<<SUMMARY>>", sanit(config.summary))
