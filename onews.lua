@@ -19,7 +19,7 @@ else
 
 	config_txt = json.encode({
 		address = "https://bilimolimpiyatlari.tubitak.gov.tr/tr/duyurular",
-		action = "notify-send -u critical '<<SUMMARY>>' '<<BODY>>'",
+		action = "DISPLAY=:0 notify-send -u critical '<<SUMMARY>>' '<<BODY>>'",
 		summary = "Bilim Olimpiyatları",
 		log_file = home .. "/.krsln-onews.log",
 		sanitize_pattern = "'",
